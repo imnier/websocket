@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebSocket Chat</title>
+    <style>
+      body {
+        font-size: 25px;
+      }
+      h3 {
+        width: 100%;
+        height: 40px;
+        line-height: 20px;
+        margin: 0 auto;
+        text-align: center;
+      }
+      input {
+        display: inline-block;
+        flex: 1;
+        height: 20px;
+        line-height: 40px;
+        border-radius: 5px;
+        border: 1px solid #696969;
+        outline: none;
+      }
+      form {
+        width: 100%;
+        margin: 50px auto 0;
+      }
+      textarea {
+        font-size: 18px;
+        width: 100%;
+        height: 300px;
+        border: 1px solid #727272;
+      }
+      .controls {
+        display: flex-inline;
+        justify-content: center;
+        align-items: center;
+      }
+      
+      button {
+        width: 100px;
+        line-height: 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form onsubmit="return false;">
+      <h3>WS 聊天室</h3>
+      <textarea id="content"></textarea>
+      <div class="controls">
+        <input type="text" name="message" />
+        <button onclick="send(this.form.message)">发送消息</button>
+        <button
+          type="button"
+          onclick="javascript:document.getElementById('responseText').value=''"
+          value="清空聊天记录"
+        >
+          清空聊天记录
+        </button>
+      </div>
+    </form>
+    <script type="text/javascript">
+      let socket;
+      const dom = document.getElementById("content");
+      console.log(dom);
+      if (!window.WebSocket) {
+        window.WebSocket = window.MozWebSocket;
+      }
+      if (window.WebSocket) {
+        socket = new WebSocket("ws://localhost:8080/ws");
+        socket.onmessage = function (event) {
+          console.log("响应信息", event.data);
+          dom.value = dom.value + "\n" + event.data;
+        };
+        socket.onopen = function (event) {
+          dom.value = "连接开启!";
+        };
+        socket.onclose = function (event) {
+          dom.value = dom.value + "\n" + "连接被关闭";
+        };
+      } else {
+        alert("你的浏览器不支持 WebSocket！");
+      }
+
+      function send(e) {
+        if (!window.WebSocket) {
+          return;
+        }
+        if (socket.readyState == WebSocket.OPEN) {
+          socket.send(e.value);
+        } else {
+          alert("连接没有开启");
+        }
+        e.value = '';
+      }
+    </script>
+    <br />
+    <br />
+  </body>
+</html>
